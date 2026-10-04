@@ -1,0 +1,711 @@
+/* Dino Escapade - Modern Game CSS */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Luckiest+Guy&family=Rye&display=swap');
+
+:root {
+  --bg-burgundy-dark: #1f0308;
+  --bg-burgundy: #370617;
+  --bg-burgundy-mid: #6a040f;
+  --fire-orange: #f48c06;
+  --fire-yellow: #ffba08;
+  --fire-red: #d00000;
+  --gauge-green: #2ecc71;
+  --gauge-green-glow: #39ff14;
+  --card-yellow: #f5b72e;
+  --card-yellow-border: #de9b15;
+  --btn-red: #4a0d18;
+  --btn-red-hover: #671120;
+  --btn-red-active: #32080f;
+  --text-dark: #2c090e;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family: 'Fredoka', cursive, sans-serif;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #0b0204;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#game-wrapper {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  max-width: 1600px;
+  max-height: 900px;
+  aspect-ratio: 16 / 9;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 100px rgba(220, 47, 2, 0.15);
+  background: #000;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+/* Canvas */
+#game-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: auto;
+  transition: filter 0.3s ease;
+}
+
+#game-canvas.grayscale-filter {
+  filter: grayscale(100%) contrast(1.1) brightness(0.95);
+}
+
+/* UI Layer */
+#ui-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* HUD Top Header */
+.hud-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.5% 2%;
+  width: 100%;
+  pointer-events: none;
+}
+
+.hud-gauges {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  pointer-events: auto;
+}
+
+/* Gauge Circle Widget */
+.gauge-widget {
+  position: relative;
+  width: 68px;
+  height: 68px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle, #4a0d18 0%, #200409 100%);
+  border: 3px solid #200409;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.gauge-widget:hover {
+  transform: scale(1.06);
+}
+
+.gauge-svg {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 76px;
+  height: 76px;
+  transform: rotate(-90deg);
+  pointer-events: none;
+}
+
+.gauge-bg-ring {
+  fill: none;
+  stroke: rgba(0, 0, 0, 0.5);
+  stroke-width: 6;
+}
+
+.gauge-progress-ring {
+  fill: none;
+  stroke: #2ecc71;
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.25s ease, stroke 0.25s ease;
+  filter: drop-shadow(0 0 4px #39ff14);
+}
+
+.gauge-progress-ring.full {
+  stroke: #ffba08;
+  filter: drop-shadow(0 0 8px #ffba08);
+}
+
+.gauge-icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+
+/* Glowing Aura for Max Power */
+.gauge-widget.powered-up {
+  animation: pulse-aura 0.9s infinite alternate;
+}
+
+@keyframes pulse-aura {
+  0% {
+    box-shadow: 0 0 10px #39ff14, 0 0 20px #39ff14, inset 0 0 10px #39ff14;
+  }
+  100% {
+    box-shadow: 0 0 22px #ffba08, 0 0 35px #f48c06, inset 0 0 15px #ffba08;
+  }
+}
+
+/* Center HUD Info: Meat count, Score, Distance */
+.hud-center-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: rgba(30, 4, 8, 0.75);
+  backdrop-filter: blur(8px);
+  padding: 8px 24px;
+  border-radius: 40px;
+  border: 2px solid rgba(255, 186, 8, 0.35);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+}
+
+.stat-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+}
+
+.stat-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffba08;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 24px;
+  color: #fff;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(255, 186, 8, 0.4);
+}
+
+.hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+/* Circular HUD Buttons (Pause, Audio, Theme) */
+.hud-round-btn {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #550a17 0%, #290409 100%);
+  border: 3px solid #ffba08;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.hud-round-btn:hover {
+  transform: scale(1.1);
+  border-color: #ffd666;
+  background: radial-gradient(circle, #6f0e20 0%, #3a060d 100%);
+}
+
+.hud-round-btn:active {
+  transform: scale(0.95);
+}
+
+.hud-round-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: #ffba08;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+
+/* Mobile & Touch Controls HUD */
+.hud-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 2% 3%;
+  width: 100%;
+  pointer-events: none;
+}
+
+.touch-btn {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 28px;
+  border-radius: 30px;
+  background: linear-gradient(180deg, #f48c06 0%, #d00000 100%);
+  border: 3px solid #ffba08;
+  color: #fff;
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 20px;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.4);
+  cursor: pointer;
+  transition: transform 0.1s ease, filter 0.15s ease;
+}
+
+.touch-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+}
+
+.touch-btn:active {
+  transform: translateY(2px);
+}
+
+.touch-btn.fire-btn {
+  background: linear-gradient(180deg, #ff5722 0%, #b71c1c 100%);
+  display: none; /* Shown when powered up */
+  animation: pulse-fire-btn 0.8s infinite alternate;
+}
+
+@keyframes pulse-fire-btn {
+  0% { transform: scale(1); box-shadow: 0 0 10px #ff5722; }
+  100% { transform: scale(1.06); box-shadow: 0 0 24px #ffba08; }
+}
+
+/* Controls Hint Bar at Bottom */
+.controls-hint {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.5);
+  padding: 6px 16px;
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+
+/* ========================================================= */
+/* DEDICATED LOADING SCREEN OVERLAY */
+/* ========================================================= */
+#loading-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at center, #6a040f 0%, #370617 45%, #180208 90%);
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+#loading-screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loading-logo-container {
+  margin-bottom: 50px;
+  text-align: center;
+  position: relative;
+}
+
+.loading-title-img {
+  max-width: 680px;
+  width: 80vw;
+  filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.8));
+  animation: float-logo 3s ease-in-out infinite alternate;
+}
+
+@keyframes float-logo {
+  0% { transform: translateY(0px) scale(1); }
+  100% { transform: translateY(-8px) scale(1.02); }
+}
+
+.loading-tagline {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 18px;
+  letter-spacing: 2px;
+  color: #ffba08;
+  margin-top: 10px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+}
+
+/* Loading Bar Container matching specification */
+.loading-bar-wrapper {
+  position: relative;
+  width: 65%;
+  max-width: 720px;
+  height: 44px;
+  background: #140206;
+  border: 4px solid #ffea28;
+  border-radius: 6px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), inset 0 4px 8px rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  padding: 3px;
+}
+
+/* Green to Yellow Gradient Fill */
+.loading-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #ffea28 0%, #a0e822 40%, #2ecc71 100%);
+  border-radius: 2px;
+  transition: width 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+  box-shadow: 0 0 15px rgba(160, 232, 34, 0.7);
+}
+
+/* Small T-Rex head icon on the right edge of loading bar */
+.loading-dino-head {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  width: 58px;
+  height: 58px;
+  transform: translate(-30%, -50%);
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.7));
+  transition: left 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+  pointer-events: none;
+  animation: head-bob 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes head-bob {
+  0% { transform: translate(-30%, -52%) rotate(-3deg); }
+  100% { transform: translate(-30%, -48%) rotate(3deg); }
+}
+
+.loading-status-text {
+  margin-top: 24px;
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 20px;
+  color: #ffba08;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.start-btn {
+  margin-top: 20px;
+  padding: 14px 44px;
+  border-radius: 40px;
+  background: linear-gradient(180deg, #ffba08 0%, #f48c06 50%, #dc2f02 100%);
+  border: 4px solid #fff;
+  color: #200409;
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 28px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(220, 47, 2, 0.6), inset 0 2px 6px rgba(255, 255, 255, 0.6);
+  transition: transform 0.15s ease, filter 0.15s ease;
+  display: none; /* Displayed when 100% loaded */
+  animation: pulse-start 1.2s infinite alternate;
+}
+
+@keyframes pulse-start {
+  0% { transform: scale(1); box-shadow: 0 6px 20px rgba(244, 140, 6, 0.6); }
+  100% { transform: scale(1.08); box-shadow: 0 10px 35px rgba(255, 186, 8, 0.9); }
+}
+
+.start-btn:hover {
+  filter: brightness(1.15);
+}
+
+.start-btn:active {
+  transform: scale(0.96);
+}
+
+/* ========================================================= */
+/* PAUSE MODAL SCREEN (Matching pause.jpeg) */
+/* ========================================================= */
+#pause-modal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+  pointer-events: none;
+}
+
+#pause-modal.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Tall yellow box matching pause.jpeg */
+.pause-card {
+  width: 290px;
+  background: #f1a826;
+  border-radius: 42px;
+  padding: 38px 28px 44px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5), inset 0 4px 10px rgba(255, 255, 255, 0.35);
+  border: 4px solid #df9514;
+  animation: pop-modal 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes pop-modal {
+  0% { transform: scale(0.85); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.pause-title {
+  font-family: 'Rye', 'Luckiest Guy', cursive, serif;
+  font-size: 34px;
+  font-weight: 700;
+  color: #4a0d18;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.menu-buttons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+/* Button with circular dark-red icon and label */
+.menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  padding: 4px 6px;
+  border-radius: 50px;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.menu-btn:hover {
+  transform: translateX(4px) scale(1.03);
+  background: rgba(74, 13, 24, 0.08);
+}
+
+.menu-btn:active {
+  transform: scale(0.97);
+}
+
+.menu-btn-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #480d19;
+  border: 3.5px solid #24050b;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.15);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.menu-btn:hover .menu-btn-circle {
+  background: #611022;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+}
+
+.menu-btn-circle svg {
+  width: 28px;
+  height: 28px;
+  fill: #f1a826;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+
+.menu-btn-text {
+  font-family: 'Rye', 'Luckiest Guy', cursive, serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #4a0d18;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ========================================================= */
+/* GAME OVER (DEAD!!!) MODAL (Matching loose icons.jpeg) */
+/* ========================================================= */
+#gameover-modal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 55;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+  pointer-events: none;
+}
+
+#gameover-modal.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.gameover-card {
+  width: 380px;
+  background: #f1a826;
+  border-radius: 42px;
+  padding: 32px 30px 38px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), inset 0 4px 10px rgba(255, 255, 255, 0.35);
+  border: 4px solid #df9514;
+  animation: pop-modal 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.gameover-title {
+  font-family: 'Rye', 'Luckiest Guy', cursive, serif;
+  font-size: 40px;
+  font-weight: 700;
+  color: #72091c;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.gameover-stats-grid {
+  width: 100%;
+  background: rgba(74, 13, 24, 0.12);
+  border-radius: 18px;
+  padding: 12px 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.go-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.go-stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #4a0d18;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.go-stat-val {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 20px;
+  color: #4a0d18;
+}
+
+/* Horizontal two-button row matching loose icons.jpeg */
+.gameover-buttons-row {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  width: 100%;
+}
+
+.go-circle-btn {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #480d19;
+  border: 4px solid #24050b;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.go-circle-btn:hover {
+  transform: scale(1.1);
+  background: #6a1324;
+}
+
+.go-circle-btn:active {
+  transform: scale(0.94);
+}
+
+.go-circle-btn svg {
+  width: 32px;
+  height: 32px;
+  fill: #f1a826;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+
+/* Floating Fire Power Notification */
+#power-alert {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  background: linear-gradient(90deg, #ffba08 0%, #f48c06 50%, #d00000 100%);
+  color: #fff;
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 28px;
+  letter-spacing: 2px;
+  padding: 12px 32px;
+  border-radius: 40px;
+  border: 3px solid #fff;
+  box-shadow: 0 8px 30px rgba(244, 140, 6, 0.8);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+  pointer-events: none;
+  z-index: 40;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+  opacity: 0;
+}
+
+#power-alert.show {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
